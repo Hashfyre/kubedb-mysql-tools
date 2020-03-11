@@ -131,7 +131,7 @@ rm -rf *
 case "$op" in
   backup)
     echo "Dumping database......"
-    mysqldump -u ${DB_USER} --password=${DB_PASSWORD} -h ${DB_HOST} "$@" >dumpfile.sql
+    mysqldump -u ${DB_USER} --password=${DB_PASSWORD} -h ${DB_HOST} "$@" --set-gtid-purged=off > dumpfile.sql
 
     echo "Uploading dump file to the backend......."
     osm push --enable-analytics="$ENABLE_ANALYTICS" --osmconfig="$OSM_CONFIG_FILE" -c "$DB_BUCKET" "$DB_DATA_DIR" "$DB_FOLDER/$DB_SNAPSHOT"
