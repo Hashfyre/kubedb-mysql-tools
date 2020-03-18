@@ -30,6 +30,7 @@ show_help() {
   echo "    --data-dir=DIR                 path to directory holding db data (default: /var/data)"
   echo "    --host=HOST                    database host"
   echo "    --user=USERNAME                database username"
+  echo "    --database=DATABASE            name of database"
   echo "    --bucket=BUCKET                name of bucket"
   echo "    --folder=FOLDER                name of folder in bucket"
   echo "    --snapshot=SNAPSHOT            name of snapshot"
@@ -42,6 +43,7 @@ DB_HOST=${DB_HOST:-}
 DB_PORT=${DB_PORT:-3306}
 DB_USER=${DB_USER:-}
 DB_PASSWORD=${DB_PASSWORD:-}
+DB_DATABASE=${DB_DATABASE:-}
 DB_BUCKET=${DB_BUCKET:-}
 DB_FOLDER=${DB_FOLDER:-}
 DB_SNAPSHOT=${DB_SNAPSHOT:-}
@@ -73,6 +75,12 @@ while test $# -gt 0; do
     --user*)
       if [ -z "$DB_USER" ]; then
         export DB_USER=$(echo $1 | sed -e 's/^[^=]*=//g')
+      fi
+      shift
+      ;;
+    --database*)
+      if [ -z "$DB_DATABASE" ]; then
+        export DB_DATABASE=$(echo $1 | sed -e 's/^[^=]*=//g')
       fi
       shift
       ;;
@@ -131,7 +139,7 @@ rm -rf *
 case "$op" in
   backup)
     echo "Dumping database......"
-    mysqldump -u ${DB_USER} --password=${DB_PASSWORD} -h ${DB_HOST} "$@" --set-gtid-purged=off > dumpfile.sql
+    mysqldump -u ${DB_USER} --password=${DB_PASSWORD} -h ${DB_HOST} --set-gtid-purged=off --databases ${DB_DATABASE} > dumpfile.sql
 
     echo "Uploading dump file to the backend......."
     osm push --enable-analytics="$ENABLE_ANALYTICS" --osmconfig="$OSM_CONFIG_FILE" -c "$DB_BUCKET" "$DB_DATA_DIR" "$DB_FOLDER/$DB_SNAPSHOT"
